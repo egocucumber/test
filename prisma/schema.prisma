@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  tokenVersion Int      @default(0)
+  name      String
+  email     String   @unique
+  password  String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ShopOwner {
+  id        Int      @id @default(autoincrement())
+  name      String
+  contacts  String
+  shops     Shop[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Shop {
+  id          Int       @id @default(autoincrement())
+  name        String
+  address     String
+  login       String    @unique
+  password    String
+  owner       ShopOwner @relation(fields: [ownerId], references: [id])
+  ownerId     Int
+  terminals   Terminal[]
+  requests    Request[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Terminal {
+  id        Int      @id @default(autoincrement())
+  macAddress String   @unique
+  status    TerminalStatus @default(INACTIVE)
+  shop      Shop     @relation(fields: [shopId], references: [id])
+  shopId    Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Request {
+  id         Int        @id @default(autoincrement())
+  macAddress String
+  shop       Shop       @relation(fields: [shopId], references: [id])
+  shopId     Int
+  status     RequestStatus @default(PENDING)
+  comment    String?
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+enum Role {
+  ROOT
+  MANAGER
+}
+
+enum TerminalStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
