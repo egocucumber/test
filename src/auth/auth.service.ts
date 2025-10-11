@@ -36,21 +36,17 @@ export class AuthService {
     }
 
     async logout(userId: number) {
-        await this.prisma.admin.update({
-            where: { id: userId },
-            data: { tokenVersion: { increment: 1 } },
-        });
-        return { message: 'Успешный выход.' };
+                return { message: 'Успешный выход.' };
     }
 
     async refreshToken(user: any) {
-  const dbUser = await this.prisma.admin.findUnique({ where: { id: user.id } });
-  if (!dbUser) {
-    throw new UnauthorizedException('Пользователь не найден.');
-  }
+        const dbUser = await this.prisma.admin.findUnique({ where: { id: user.id } });
+        if (!dbUser) {
+            throw new UnauthorizedException('Пользователь не найден.');
+        }
 
-  return this.generateToken(dbUser); 
-}
+        return this.generateToken(dbUser);
+    }
 
     private generateToken(user: Admin) {
         const payload = {

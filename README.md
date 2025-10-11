@@ -1,98 +1,304 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Админ-панель для центрального офиса
+## Стек технологий
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+- **NestJS** - фреймворк для Node.js
+- **Prisma** - ORM для работы с базой данных
+- **PostgreSQL** - база данных
+- **JWT** - авторизация
+- **Docker** - контейнеризация
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Запуск проекта
 
-## Description
+### Требования
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Docker
+- Docker Compose
 
-## Project setup
+### Быстрый запуск
 
 ```bash
-$ npm install
+# Клонируйте репозиторий
+git clone <repository-url>
+cd testBEt
+
+# Запустите проект одной командой
+docker-compose up --build
 ```
 
-## Compile and run the project
+Приложение будет доступно по адресу: `http://localhost:4443`
+
+### Первоначальная настройка
+
+После запуска создается root пользователь:
+- **Email**: `root@example.com`
+- **Пароль**: `Password123`
+
+## API Документация
+
+### Авторизация и безопасность
+
+#### POST /auth/login
+Вход по email и паролю, выдача JWT.
+
+**Запрос:**
+```json
+{
+  "email": "root@example.com",
+  "password": "Password123"
+}
+```
+
+**Ответ:**
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+#### POST /auth/logout
+Завершение текущей сессии.
+
+**Заголовки:** `Authorization: Bearer <token>`
+
+#### POST /auth/refresh
+Обновление JWT токена.
+
+**Заголовки:** `Authorization: Bearer <token>`
+
+### Администраторы
+
+Все эндпоинты требуют роль ROOT.
+
+#### GET /admins
+Список администраторов.
+
+#### POST /admins
+Создать менеджера (только для ROOT).
+
+**Запрос:**
+```json
+{
+  "name": "Manager Name",
+  "email": "manager@example.com",
+  "password": "Password123"
+}
+```
+
+#### PATCH /admins/:id/password
+Смена пароля администратора (только для ROOT).
+
+**Запрос:**
+```json
+{
+  "password": "NewPassword123"
+}
+```
+
+#### DELETE /admins/:id
+Удалить администратора (только для ROOT).
+
+### Владельцы магазинов
+
+#### GET /shops-owners
+Список владельцев.
+
+#### GET /shops-owners/:id
+Карточка владельца.
+
+#### POST /shops-owners
+Создать владельца.
+
+**Запрос:**
+```json
+{
+  "name": "Owner Name",
+  "contacts": "phone: +1234567890, email: owner@example.com"
+}
+```
+
+#### PATCH /shops-owners/:id
+Изменить владельца.
+
+#### DELETE /shops-owners/:id
+Удалить владельца.
+
+### Магазины
+
+#### GET /shops
+Список магазинов.
+
+#### GET /shops/:id
+Карточка магазина.
+
+#### POST /shops
+Создать магазин.
+
+**Запрос:**
+```json
+{
+  "name": "Shop Name",
+  "address": "Shop Address",
+  "login": "shop_login",
+  "password": "shop_password",
+  "ownerId": 1
+}
+```
+
+#### PATCH /shops/:id/credentials
+Изменить логин/пароль магазина.
+
+**Запрос:**
+```json
+{
+  "login": "new_login",
+  "password": "new_password"
+}
+```
+
+### Терминалы
+
+#### GET /terminals
+Список терминалов.
+
+#### GET /terminals/:id
+Карточка терминала.
+
+#### PATCH /terminals/:id/status
+Обновить статус терминала вручную.
+
+**Запрос:**
+```json
+{
+  "status": "ACTIVE"
+}
+```
+
+#### POST /terminals/alive
+Heartbeat от терминала (обновление статуса «активный»).
+
+**Запрос:**
+```json
+{
+  "macAddress": "AA:BB:CC:DD:EE:FF"
+}
+```
+
+### Заявки
+
+#### GET /requests
+Список заявок.
+
+#### PATCH /requests/:id/approve
+Одобрить заявку → создать терминал.
+
+#### PATCH /requests/:id/reject
+Отклонить заявку.
+
+#### POST /requests/:id/comment
+Добавить комментарий к заявке.
+
+**Запрос:**
+```json
+{
+  "comment": "Комментарий к заявке"
+}
+```
+
+### Профиль
+
+#### PATCH /profile/password
+Смена пароля текущего пользователя.
+
+**Запрос:**
+```json
+{
+  "currentPassword": "CurrentPassword123",
+  "newPassword": "NewPassword123"
+}
+```
+
+## Роли и права
+
+### ROOT
+- Может создавать, изменять и удалять менеджеров
+- Полный доступ ко всем функциям системы
+- Создается при первоначальной настройке
+- В системе может быть только один ROOT
+
+### MANAGER
+- Может управлять владельцами магазинов, магазинами, терминалами и заявками
+- Не может управлять другими администраторами
+
+## Безопасность
+
+- Пароли хранятся в зашифрованном виде (bcrypt)
+- JWT токены с контролем версии для инвалидации при повторном входе
+- Ограничение: один аккаунт = одна активная сессия
+- При повторном входе старый токен инвалидируется
+
+## Структура базы данных
+
+### Администраторы (Admin)
+- id, name, email, password, role, tokenVersion, createdAt, updatedAt
+
+### Владельцы торговых точек (ShopOwner)
+- id, name, contacts, createdAt, updatedAt
+
+### Торговая точка (Shop)
+- id, name, address, login, password, ownerId, createdAt, updatedAt
+
+### Терминалы ККМ (Terminal)
+- id, macAddress, status, shopId, createdAt, updatedAt
+
+### Заявки на подключение терминалов (Request)
+- id, macAddress, shopId, status, comment, createdAt, updatedAt
+
+## Разработка
+
+### Локальная разработка
 
 ```bash
-# development
-$ npm run start
+# Установка зависимостей
+npm install
 
-# watch mode
-$ npm run start:dev
+# Запуск в режиме разработки
+npm run start:dev
 
-# production mode
-$ npm run start:prod
+# Запуск миграций
+npx prisma migrate dev
+
+# Генерация Prisma клиента
+npx prisma generate
+
+# Запуск seed
+npx prisma db seed
 ```
 
-## Run tests
+### Docker команды
 
 ```bash
-# unit tests
-$ npm run test
+# Запуск в фоновом режиме
+docker-compose up -d
 
-# e2e tests
-$ npm run test:e2e
+# Остановка
+docker-compose down
 
-# test coverage
-$ npm run test:cov
+# Пересборка
+docker-compose up --build
+
+# Просмотр логов
+docker-compose logs -f
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Тестирование
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+# Unit тесты
+npm run test
+
+# E2E тесты
+npm run test:e2e
+
+# Покрытие тестами
+npm run test:cov
 ```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
